@@ -1,7 +1,7 @@
 package main;
 
-import moa.classifier.DecisionStumpTutorial;
 import moa.classifiers.Classifier;
+import moa.classifiers.DecisionStumpTutorial;
 import moa.evaluation.BasicClassificationPerformanceEvaluator;
 import moa.evaluation.ClassificationPerformanceEvaluator;
 import moa.streams.generators.RandomRBFGeneratorDrift;
@@ -54,8 +54,7 @@ public class Main {
 		
 		System.out.println(resultingEvaluation);
 		
-		System.out.println("Finished!");	
-		
+		System.out.println("Finished!");
 	}
 
 }

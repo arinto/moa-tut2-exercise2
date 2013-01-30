@@ -1,14 +1,11 @@
 package main;
 
-import weka.core.Instance;
-import moa.classifier.ElectricityClassifier;
 import moa.classifiers.Classifier;
-import moa.evaluation.BasicClassificationPerformanceEvaluator;
-import moa.evaluation.ClassificationPerformanceEvaluator;
-import moa.evaluation.LearningEvaluation;
+import moa.classifiers.ElectricityClassifier;
+import moa.evaluation.LearningCurve;
+import moa.evaluation.WindowClassificationPerformanceEvaluator;
 import moa.streams.ArffFileStream;
-import moa.tasks.EvaluateModel;
-import moa.tasks.LearnModel;
+import moa.tasks.EvaluatePrequential;
 
 public class MainElecClassifier {
 
@@ -18,6 +15,7 @@ public class MainElecClassifier {
 
 	public static void main(String[] args) {
 
+		//prepare classifier
 		Classifier elecClassifier = new ElectricityClassifier();
 		
 		//prepare input file for streaming evaluation
@@ -25,65 +23,28 @@ public class MainElecClassifier {
 		ArffFileStream electricityArff = new ArffFileStream(arffFilePath, -1);
 		electricityArff.prepareForUse();
 		
-		int maxInstances = 10000000;
-		int numPasses = 1;
+		//prepare classification performance evaluator
+		WindowClassificationPerformanceEvaluator windowClassEvaluator = 
+				new WindowClassificationPerformanceEvaluator();
+		windowClassEvaluator.widthOption.setValue(1000);
+		windowClassEvaluator.prepareForUse();
 		
-		LearnModel lm = new LearnModel(elecClassifier, electricityArff, maxInstances, numPasses);
-		Object resultingModel = lm.doTask();
+		//set EvaluatePrequential's parameter
+		int maxInstances = 1000000;
+		int timeLimit = -1;
+		int sampleFrequencyOption = 1000;
 		
-		//2nd stream for evaluation, still use the same stream 
-		String evalArffFilePath = "/home/arinto/Dropbox/Thesis/MOA/DataSet/electricity/elecNormNew.arff";
-		ArffFileStream evalElectricityArff = new ArffFileStream(evalArffFilePath, -1);
-		evalElectricityArff.prepareForUse();
+		//do the learning and checking using evaluate-prequential technique
+		EvaluatePrequential ep = new EvaluatePrequential();
+		ep.instanceLimitOption.setValue(maxInstances);
+		ep.learnerOption.setCurrentObject(elecClassifier);
+		ep.streamOption.setCurrentObject(electricityArff);
+		ep.sampleFrequencyOption.setValue(sampleFrequencyOption);
+		ep.timeLimitOption.setValue(timeLimit);
+		ep.evaluatorOption.setCurrentObject(windowClassEvaluator);
+		ep.prepareForUse();
 		
-		ClassificationPerformanceEvaluator evaluator = 
-				new BasicClassificationPerformanceEvaluator();
-		
-		EvaluateModel em = new EvaluateModel();
-		em.modelOption.setCurrentObject(resultingModel);
-		em.streamOption.setCurrentObject(evalElectricityArff);
-		em.maxInstancesOption.setValue(maxInstances);
-		em.evaluatorOption.setCurrentObject(evaluator);
-		LearningEvaluation resultingEvaluation = (LearningEvaluation) em.doTask();
-		
-		System.out.println("Learning on the given ARFF File, Evaluation on " +
-				"the given ARFF file");
-		System.out.println("ElectricityClassifier class");
-		System.out.println(resultingEvaluation);
-		
-		double measuredAccuracy = resultingEvaluation.getMeasurements()[1].getValue();
-		System.out.println("Measured accuracy from classifier= " + measuredAccuracy);
-		
-		//Sample code to verify the accuracy result
-		System.out.println("Now, verification of the classifier result!");
-		int instanceCounter = 0;
-		int correctCounter = 0;
-		double predictedClass = 0.0;
-		ArffFileStream verificationArff = new ArffFileStream(arffFilePath, -1);
-		
-		while (verificationArff.hasMoreInstances()) {
-			Instance elecInst = verificationArff.nextInstance();
-			double classValue = elecInst.classValue();
-			if(classValue == predictedClass){
-				correctCounter++;
-			}
-			predictedClass = classValue;
-			instanceCounter++;
-		}
-		
-		double calculatedAccuracy = 100*((double)(correctCounter)/(double)(instanceCounter));
-		System.out.println("Calculated accuracy = " + calculatedAccuracy);
-
-		//Verification statement
-		if(calculatedAccuracy == measuredAccuracy)
-		{
-			System.out.println("Classifier result is the same to verification result");
-		}
-		else
-		{
-			System.out.println("Classifier result is NOT the same to verification result");
-		}
-		
-		
+		LearningCurve le = (LearningCurve) ep.doTask();
+		System.out.println(le);
 	}
 }

@@ -1,4 +1,4 @@
-package moa.classifier;
+package moa.classifiers;
 
 import weka.core.Instance;
 import moa.classifiers.AbstractClassifier;

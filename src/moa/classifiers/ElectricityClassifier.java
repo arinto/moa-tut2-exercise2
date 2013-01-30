@@ -1,4 +1,4 @@
-package moa.classifier;
+package moa.classifiers;
 
 import weka.core.Instance;
 import moa.classifiers.AbstractClassifier;
@@ -16,6 +16,7 @@ public class ElectricityClassifier extends AbstractClassifier {
 
 	private static final long serialVersionUID = 1L;
 
+	//protected variables to maintain the state of the classifier
 	protected double previousClassValue;
 		
 	@Override
@@ -23,27 +24,22 @@ public class ElectricityClassifier extends AbstractClassifier {
 		previousClassValue = 0.0;
 	}
 	
+	//main function, called for every training example
 	@Override
 	public void trainOnInstanceImpl(Instance inst) {
-		//training will have no effect, because the classifier determines 
-		//the class based on previous class result
-		//so do nothing on this part
+		previousClassValue = inst.classValue();
 	}
 	
 	@Override
 	public double[] getVotesForInstance(Instance inst) {
-		double voteResult = previousClassValue;
-		previousClassValue = inst.classValue();
-		
-		if(voteResult == 0.0)
+		if(previousClassValue == 0.0)
 		{
 			return new double[]{1.0, 0.0};
 		}
-		else if (voteResult == 1.0)
+		else if (previousClassValue == 1.0)
 		{
 			return new double[]{0.0, 1.0};
 		}
-		
 		return new double[]{0.0, 0.0};
 	}
 
@@ -55,7 +51,6 @@ public class ElectricityClassifier extends AbstractClassifier {
 	@Override
 	public void getModelDescription(StringBuilder arg0, int arg1) {
 		// do nothing here
-
 	}
 
 	@Override
