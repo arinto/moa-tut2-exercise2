@@ -1,13 +1,13 @@
 package main;
 
 import moa.classifiers.Classifier;
-import moa.classifiers.ElectricityClassifier;
+import moa.classifiers.PreviousClassClassifier;
 import moa.evaluation.LearningCurve;
 import moa.evaluation.WindowClassificationPerformanceEvaluator;
 import moa.streams.ArffFileStream;
 import moa.tasks.EvaluatePrequential;
 
-public class MainElecClassifier {
+public class MainTwo {
 
 	/**
 	 * @param args
@@ -16,7 +16,7 @@ public class MainElecClassifier {
 	public static void main(String[] args) {
 
 		//prepare classifier
-		Classifier elecClassifier = new ElectricityClassifier();
+		Classifier prevClassClasifier = new PreviousClassClassifier();
 		
 		//prepare input file for streaming evaluation
 		String arffFilePath = "/home/arinto/Dropbox/Thesis/MOA/DataSet/electricity/elecNormNew.arff";
@@ -37,14 +37,16 @@ public class MainElecClassifier {
 		//do the learning and checking using evaluate-prequential technique
 		EvaluatePrequential ep = new EvaluatePrequential();
 		ep.instanceLimitOption.setValue(maxInstances);
-		ep.learnerOption.setCurrentObject(elecClassifier);
+		ep.learnerOption.setCurrentObject(prevClassClasifier);
 		ep.streamOption.setCurrentObject(electricityArff);
 		ep.sampleFrequencyOption.setValue(sampleFrequencyOption);
 		ep.timeLimitOption.setValue(timeLimit);
 		ep.evaluatorOption.setCurrentObject(windowClassEvaluator);
 		ep.prepareForUse();
 		
+		//do the task and get the result
 		LearningCurve le = (LearningCurve) ep.doTask();
+		System.out.println("Evaluate prequential using PreviousClassClassifier");
 		System.out.println(le);
 	}
 }
