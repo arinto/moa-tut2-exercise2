@@ -12,6 +12,7 @@ import moa.tasks.LearnModel;
 public class Main {
 
 	/**
+	 * Main class for Decision Stump Tutorial
 	 * @param args
 	 */
 	public static void main(String[] args) {

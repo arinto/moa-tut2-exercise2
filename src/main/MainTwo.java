@@ -10,8 +10,10 @@ import moa.tasks.EvaluatePrequential;
 public class MainTwo {
 
 	/**
+	 * Main class for PreviousClassClassifier
 	 * @param args
 	 */
+	private static final String DEFAULT_INPUT_FILE="elecNormNew.arff";
 
 	public static void main(String[] args) {
 
@@ -19,9 +21,20 @@ public class MainTwo {
 		Classifier prevClassClasifier = new PreviousClassClassifier();
 		
 		//prepare input file for streaming evaluation
-		String arffFilePath = "/home/arinto/Dropbox/Thesis/MOA/DataSet/electricity/elecNormNew.arff";
-		ArffFileStream electricityArff = new ArffFileStream(arffFilePath, -1);
-		electricityArff.prepareForUse();
+		String arffFilePath = null;
+		if ((args == null) || (args.length < 1)) {
+			arffFilePath = System.getenv("HOME") + "/" + DEFAULT_INPUT_FILE;
+		} else {
+			arffFilePath = args[0];
+		}
+		ArffFileStream electricityArff = null;
+		try {
+			electricityArff = new ArffFileStream(arffFilePath, -1);
+			electricityArff.prepareForUse();
+		} catch (Exception e) {
+			System.out.println("Problem with loading arff file. Quit the program");
+			System.exit(-1);
+		}
 		
 		//prepare classification performance evaluator
 		WindowClassificationPerformanceEvaluator windowClassEvaluator = 
